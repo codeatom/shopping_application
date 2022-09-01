@@ -13,27 +13,29 @@ public class ProductDAOImpl extends GenericDelete implements ProductDAO {
 
     @Override
     public Product save(Product product) {
-        ResultSet resultSet = null;
+        Product savedObject = null;
         String CREATE = "INSERT INTO product (id, name, price) VALUES  (?,?,?)";
 
-        try(Connection connection = ConnectionProvider.getConnection()){
-            PreparedStatement preparedStatement = connection.prepareStatement(CREATE, Statement.RETURN_GENERATED_KEYS);
+        try(Connection connection = ConnectionProvider.getConnection();
+            PreparedStatement preparedStatement = connection.prepareStatement(CREATE, Statement.RETURN_GENERATED_KEYS)){
 
             preparedStatement.setInt(1,product.getId());
             preparedStatement.setString(2, product.getName());
             preparedStatement.setDouble(3, product.getPrice());
 
             int result = preparedStatement.executeUpdate();
-            resultSet = preparedStatement.getGeneratedKeys();
+            ResultSet resultSet = preparedStatement.getGeneratedKeys();
 
             if (result == 1 && resultSet.next()){
-                return new Product(resultSet.getInt(1), product.getName(), product.getPrice());
+                savedObject = new Product(resultSet.getInt(1), product.getName(), product.getPrice());
             }
+            resultSet.close();
+
         }catch (SQLException e){
             e.printStackTrace();
         }
 
-        return null;
+        return savedObject;
     }
 
     @Override
@@ -41,8 +43,8 @@ public class ProductDAOImpl extends GenericDelete implements ProductDAO {
         Optional<Product> product = Optional.empty();
         String SELECT = "SELECT * FROM product WHERE id = ?";
 
-        try(Connection connection = ConnectionProvider.getConnection()){
-            PreparedStatement preparedStatement = connection.prepareStatement(SELECT);
+        try(Connection connection = ConnectionProvider.getConnection();
+            PreparedStatement preparedStatement = connection.prepareStatement(SELECT)){
 
             preparedStatement.setInt(1, id);
             ResultSet resultSet = preparedStatement.executeQuery();
@@ -54,6 +56,8 @@ public class ProductDAOImpl extends GenericDelete implements ProductDAO {
                         resultSet.getDouble("price")
                 ));
             }
+            resultSet.close();
+
         }catch (SQLException e){
             e.printStackTrace();
         }
@@ -66,8 +70,8 @@ public class ProductDAOImpl extends GenericDelete implements ProductDAO {
         List<Product> productList = new ArrayList<>();
         String SELECT = "SELECT * FROM product";
 
-        try(Connection connection = ConnectionProvider.getConnection()){
-            PreparedStatement preparedStatement = connection.prepareStatement(SELECT);
+        try(Connection connection = ConnectionProvider.getConnection();
+            PreparedStatement preparedStatement = connection.prepareStatement(SELECT)){
 
             ResultSet resultSet = preparedStatement.executeQuery();
 
@@ -80,6 +84,8 @@ public class ProductDAOImpl extends GenericDelete implements ProductDAO {
                         )
                 );
             }
+            resultSet.close();
+
         }catch (SQLException e){
             e.printStackTrace();
         }

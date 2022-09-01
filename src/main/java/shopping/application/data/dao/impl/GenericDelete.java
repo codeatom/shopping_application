@@ -9,8 +9,8 @@ import java.sql.SQLException;
 public abstract class GenericDelete {
 
     public boolean delete(Integer id, String DELETE) {
-        try(Connection connection = ConnectionProvider.getConnection()){
-            PreparedStatement preparedStatement = connection.prepareStatement(DELETE);
+        try(Connection connection = ConnectionProvider.getConnection();
+            PreparedStatement preparedStatement = connection.prepareStatement(DELETE)){
 
             preparedStatement.setInt(1, id);
 

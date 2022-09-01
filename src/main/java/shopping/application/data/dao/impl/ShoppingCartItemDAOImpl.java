@@ -20,11 +20,11 @@ public class ShoppingCartItemDAOImpl extends GenericDelete implements ShoppingCa
 
     @Override
     public ShoppingCartItem save(ShoppingCartItem shoppingCartItem) {
-        ResultSet resultSet = null;
+        ShoppingCartItem savedObject = null;
         String CREATE = "INSERT INTO shopping_cart_item (id, amount, total_price, product_id, shopping_cart_id) VALUES  (?,?,?,?,?)";
 
-        try(Connection connection = ConnectionProvider.getConnection()){
-            PreparedStatement preparedStatement = connection.prepareStatement(CREATE, Statement.RETURN_GENERATED_KEYS);
+        try(Connection connection = ConnectionProvider.getConnection();
+            PreparedStatement preparedStatement = connection.prepareStatement(CREATE, Statement.RETURN_GENERATED_KEYS)){
 
             preparedStatement.setInt(1,shoppingCartItem.getId());
             preparedStatement.setInt(2, shoppingCartItem.getAmount());
@@ -33,21 +33,23 @@ public class ShoppingCartItemDAOImpl extends GenericDelete implements ShoppingCa
             preparedStatement.setInt(5, shoppingCartItem.getCart().getId());
 
             int result = preparedStatement.executeUpdate();
-            resultSet = preparedStatement.getGeneratedKeys();
+            ResultSet resultSet = preparedStatement.getGeneratedKeys();
 
 
           if (result == 1 && resultSet.next()){
               Product product = productDAO.findById(shoppingCartItem.getItem().getId()).get();
               ShoppingCart shoppingCart = shoppingCartDAO.findById(shoppingCartItem.getCart().getId()).get();
 
-              return new ShoppingCartItem(resultSet.getInt(1), shoppingCartItem.getAmount(),
+              savedObject = new ShoppingCartItem(resultSet.getInt(1), shoppingCartItem.getAmount(),
                       shoppingCartItem.getTotalPrice(), product, shoppingCart);
           }
+          resultSet.close();
+
         }catch (SQLException e){
             e.printStackTrace();
         }
 
-        return null;
+        return savedObject;
     }
 
     @Override
@@ -55,12 +57,11 @@ public class ShoppingCartItemDAOImpl extends GenericDelete implements ShoppingCa
         Optional<ShoppingCartItem> shoppingCartItem = Optional.empty();
         String SELECT = "SELECT * FROM shopping_cart_item WHERE id = ?";
 
-        try(Connection connection = ConnectionProvider.getConnection()){
-            PreparedStatement preparedStatement = connection.prepareStatement(SELECT);
+        try(Connection connection = ConnectionProvider.getConnection();
+            PreparedStatement preparedStatement = connection.prepareStatement(SELECT)){
 
             preparedStatement.setInt(1, id);
             ResultSet resultSet = preparedStatement.executeQuery();
-
 
             while (resultSet.next()){
                 Product product = productDAO.findById(resultSet.getInt("product_id")).get();
@@ -74,6 +75,8 @@ public class ShoppingCartItemDAOImpl extends GenericDelete implements ShoppingCa
                         shoppingCart
                 ));
             }
+            resultSet.close();
+
         }catch (SQLException e){
             e.printStackTrace();
         }
@@ -86,8 +89,8 @@ public class ShoppingCartItemDAOImpl extends GenericDelete implements ShoppingCa
         List<ShoppingCartItem> shoppingCartItemList = new ArrayList<>();
         String SELECT = "SELECT * FROM shopping_cart_item";
 
-        try(Connection connection = ConnectionProvider.getConnection()){
-            PreparedStatement preparedStatement = connection.prepareStatement(SELECT);
+        try(Connection connection = ConnectionProvider.getConnection();
+            PreparedStatement preparedStatement = connection.prepareStatement(SELECT)){
 
             ResultSet resultSet = preparedStatement.executeQuery();
 
@@ -105,6 +108,8 @@ public class ShoppingCartItemDAOImpl extends GenericDelete implements ShoppingCa
                         )
                 );
             }
+            resultSet.close();
+
         }catch (SQLException e){
             e.printStackTrace();
         }
