@@ -29,16 +29,31 @@ public class ShoppingCartItemDAOImpl extends GenericDelete implements ShoppingCa
             preparedStatement.setInt(1,shoppingCartItem.getId());
             preparedStatement.setInt(2, shoppingCartItem.getAmount());
             preparedStatement.setDouble(3, shoppingCartItem.getTotalPrice());
-            preparedStatement.setInt(4, shoppingCartItem.getItem().getId());
-            preparedStatement.setInt(5, shoppingCartItem.getCart().getId());
+            if(shoppingCartItem.getItem() == null){
+                preparedStatement.setNull(4, java.sql.Types.INTEGER);
+            }else {
+                preparedStatement.setInt(4, shoppingCartItem.getItem().getId());
+            }
+            if(shoppingCartItem.getCart() == null){
+                preparedStatement.setNull(5, java.sql.Types.INTEGER);
+            }else {
+                preparedStatement.setInt(5, shoppingCartItem.getCart().getId());
+            }
 
             int result = preparedStatement.executeUpdate();
             ResultSet resultSet = preparedStatement.getGeneratedKeys();
 
 
           if (result == 1 && resultSet.next()){
-              Product product = productDAO.findById(shoppingCartItem.getItem().getId()).get();
-              ShoppingCart shoppingCart = shoppingCartDAO.findById(shoppingCartItem.getCart().getId()).get();
+              Product product = null;
+              ShoppingCart shoppingCart = null;
+
+              if(shoppingCartItem.getItem() != null){
+                  product = productDAO.findById(shoppingCartItem.getItem().getId()).get();
+              }
+              if(shoppingCartItem.getCart() != null){
+                  shoppingCart = shoppingCartDAO.findById(shoppingCartItem.getCart().getId()).get();
+              }
 
               savedObject = new ShoppingCartItem(resultSet.getInt(1), shoppingCartItem.getAmount(),
                       shoppingCartItem.getTotalPrice(), product, shoppingCart);
@@ -64,8 +79,15 @@ public class ShoppingCartItemDAOImpl extends GenericDelete implements ShoppingCa
             ResultSet resultSet = preparedStatement.executeQuery();
 
             while (resultSet.next()){
-                Product product = productDAO.findById(resultSet.getInt("product_id")).get();
-                ShoppingCart shoppingCart = shoppingCartDAO.findById(resultSet.getInt("shopping_cart_id")).get();
+                Product product = null;
+                ShoppingCart shoppingCart = null;
+
+                if(resultSet.getInt("product_id") != 0){
+                    product = productDAO.findById(resultSet.getInt("product_id")).get();
+                }
+                if(resultSet.getInt("shopping_cart_id") != 0){
+                    shoppingCart = shoppingCartDAO.findById(resultSet.getInt("shopping_cart_id")).get();
+                }
 
                 shoppingCartItem = Optional.of(new ShoppingCartItem(
                         resultSet.getInt("id"),
@@ -95,8 +117,15 @@ public class ShoppingCartItemDAOImpl extends GenericDelete implements ShoppingCa
             ResultSet resultSet = preparedStatement.executeQuery();
 
             while (resultSet.next()){
-                Product product = productDAO.findById(resultSet.getInt("product_id")).get();
-                ShoppingCart shoppingCart = shoppingCartDAO.findById(resultSet.getInt("shopping_cart_id")).get();
+                Product product = null;
+                ShoppingCart shoppingCart = null;
+
+                if(resultSet.getInt("product_id") != 0){
+                    product = productDAO.findById(resultSet.getInt("product_id")).get();
+                }
+                if(resultSet.getInt("shopping_cart_id") != 0){
+                    shoppingCart = shoppingCartDAO.findById(resultSet.getInt("shopping_cart_id")).get();
+                }
 
                 shoppingCartItemList.add(
                         new ShoppingCartItem(
