@@ -73,11 +73,38 @@ public class ShoppingCartDAOImpl extends GenericDelete implements ShoppingCartDA
 
     @Override
     public List<ShoppingCart> findAll() {
-        List<ShoppingCart> shoppingCartList = new ArrayList<>();
         String SELECT = "SELECT * FROM shopping_cart";
+        return findShoppingCarts(null, SELECT);
+    }
+
+    @Override
+    public List<ShoppingCart> findByOrderStatus(String status) {
+        String SELECT = "SELECT * FROM shopping_cart WHERE shopping_cart.order_status = ?";
+        return findShoppingCarts(status, SELECT);
+    }
+
+    @Override
+    public List<ShoppingCart> findByReference(String customer) {
+        String SELECT = "SELECT * FROM shopping_cart WHERE shopping_cart.customer_reference = ?";
+        return findShoppingCarts(customer, SELECT);
+    }
+
+    @Override
+    public boolean delete(Integer id) {
+        String DELETE = "DELETE FROM shopping_cart WHERE id = ?";
+
+        return delete(id, DELETE);
+    }
+
+    private List<ShoppingCart> findShoppingCarts(String keyWord, String SELECT) {
+        List<ShoppingCart> shoppingCartList = new ArrayList<>();
 
         try(Connection connection = ConnectionProvider.getConnection();
             PreparedStatement preparedStatement = connection.prepareStatement(SELECT)){
+
+            if(!isNullOrEmpty(keyWord)){
+                preparedStatement.setString(1, keyWord);
+            }
 
             ResultSet resultSet = preparedStatement.executeQuery();
 
@@ -101,21 +128,8 @@ public class ShoppingCartDAOImpl extends GenericDelete implements ShoppingCartDA
         return shoppingCartList;
     }
 
-    @Override
-    public boolean delete(Integer id) {
-        String DELETE = "DELETE FROM shopping_cart WHERE id = ?";
-
-        return delete(id, DELETE);
-    }
-
-    @Override
-    public List<ShoppingCart> findByOrderStatus(String status) {
-        return null;
-    }
-
-    @Override
-    public List<ShoppingCart> findByReference(String customer) {
-        return null;
+    private boolean isNullOrEmpty(String s){
+        return s == null || s.trim().isEmpty();
     }
 
 }

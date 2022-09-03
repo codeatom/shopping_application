@@ -94,20 +94,70 @@ public class ProductDAOImpl extends GenericDelete implements ProductDAO {
     }
 
     @Override
-    public boolean delete(Integer id) {
-        String DELETE = "DELETE FROM product WHERE id = ?";
-
-        return delete(id, DELETE);
-    }
-
-    @Override
     public List<Product> findByName(String name) {
-        return null;
+        List<Product> productList = new ArrayList<>();
+        String SELECT = "SELECT * FROM product WHERE product.name LIKE ? OR product.name LIKE ?";
+
+        try(Connection connection = ConnectionProvider.getConnection();
+            PreparedStatement preparedStatement = connection.prepareStatement(SELECT)){
+
+            preparedStatement.setString(1, "%" + name);
+            preparedStatement.setString(2, name + "%");
+            ResultSet resultSet = preparedStatement.executeQuery();
+
+            while (resultSet.next()){
+                productList.add(
+                        new Product(
+                                resultSet.getInt("id"),
+                                resultSet.getString("name"),
+                                resultSet.getDouble("price")
+                        )
+                );
+            }
+            resultSet.close();
+
+        }catch (SQLException e){
+            e.printStackTrace();
+        }
+
+        return productList;
     }
 
     @Override
     public List<Product> findByPriceBetween(double low, double high) {
-        return null;
+        List<Product> productList = new ArrayList<>();
+        String SELECT = "SELECT * FROM product WHERE product.price BETWEEN ? AND ?";
+
+        try(Connection connection = ConnectionProvider.getConnection();
+            PreparedStatement preparedStatement = connection.prepareStatement(SELECT)){
+
+            preparedStatement.setDouble(1, low);
+            preparedStatement.setDouble(2, high);
+            ResultSet resultSet = preparedStatement.executeQuery();
+
+            while (resultSet.next()){
+                productList.add(
+                        new Product(
+                                resultSet.getInt("id"),
+                                resultSet.getString("name"),
+                                resultSet.getDouble("price")
+                        )
+                );
+            }
+            resultSet.close();
+
+        }catch (SQLException e){
+            e.printStackTrace();
+        }
+
+        return productList;
+    }
+
+    @Override
+    public boolean delete(Integer id) {
+        String DELETE = "DELETE FROM product WHERE id = ?";
+
+        return delete(id, DELETE);
     }
 
 }
