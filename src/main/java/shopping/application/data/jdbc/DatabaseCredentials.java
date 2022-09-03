@@ -28,6 +28,10 @@ public class DatabaseCredentials {
     }
 
     public static DatabaseCredentials getINSTANCE() {
+        if(INSTANCE == null){
+            throw new IllegalArgumentException("Run initialize method first");
+        }
+
         return INSTANCE;
     }
 

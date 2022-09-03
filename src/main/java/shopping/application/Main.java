@@ -10,7 +10,6 @@ import shopping.application.model.ShoppingCartItem;
 
 public class Main {
     public static void main(String[] args) {
-
-
+        DatabaseCredentials.initialize("database/mysql.properties");
     }
 }
