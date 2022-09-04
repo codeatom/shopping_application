@@ -1,6 +1,7 @@
 package shopping.application.model;
 
 import java.time.LocalDateTime;
+import java.util.Objects;
 
 public class ShoppingCart {
     private Integer id;
@@ -10,7 +11,7 @@ public class ShoppingCart {
     private String customerReference;
     private boolean paymentApproved;
 
-    public ShoppingCart(int id, long lastUpdate, String orderStatus, String deliveryAddress, String customerReference) {
+    public ShoppingCart() {
     }
 
     public ShoppingCart(Integer id, LocalDateTime lastUpdate, String orderStatus,
@@ -50,6 +51,19 @@ public class ShoppingCart {
 
     public boolean isPaymentApproved() {
         return paymentApproved;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        ShoppingCart that = (ShoppingCart) o;
+        return paymentApproved == that.paymentApproved && Objects.equals(id, that.id) && Objects.equals(lastUpdate, that.lastUpdate) && Objects.equals(orderStatus, that.orderStatus) && Objects.equals(deliveryAddress, that.deliveryAddress) && Objects.equals(customerReference, that.customerReference);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id, lastUpdate, orderStatus, deliveryAddress, customerReference, paymentApproved);
     }
 
     @Override
